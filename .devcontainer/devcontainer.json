@@ -1,0 +1,24 @@
+{
+  "name": "MariaDB Development",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "features": {
+    "ghcr.io/devcontainers/features/mariadb:1": {
+      "version": "latest"
+    }
+  },
+  "forwardPorts": [3306],
+  "postCreateCommand": "sudo service mariadb start",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "cweijan.vscode-mysql-client2",
+        "formulahendry.vscode-mysql",
+        "mtxr.sqltools",
+        "mtxr.sqltools-driver-mysql",
+        "adpyke.vscode-sql-formatter",
+        "redhat.vscode-yaml",
+        "esbenp.prettier-vscode"
+      ]
+    }
+  }
+}
