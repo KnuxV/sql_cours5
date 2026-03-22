@@ -219,11 +219,11 @@ VALUES
 SELECT * FROM "scenes";
 ```
 
-| id  | nom            | capacite |
-| --- | -------------- | -------- |
-| 1   | Grande Scène   | 5000     |
-| 2   | Chapiteau      | 800      |
-| 3   | Scène Électro  | 1200     |
+| id  | nom           | capacite |
+| --- | ------------- | -------- |
+| 1   | Grande Scène  | 5000     |
+| 2   | Chapiteau     | 800      |
+| 3   | Scène Électro | 1200     |
 
 ---
 
@@ -445,13 +445,13 @@ On supprime d'abord les concerts, puis l'artiste.
 
 On peut spécifier quoi faire quand un ID référencé est supprimé :
 
-| Clause              | Effet                                    |
-| ------------------- | ---------------------------------------- |
-| `ON DELETE RESTRICT` | empêche la suppression (par défaut)     |
-| `ON DELETE NO ACTION`| permet la suppression, ne fait rien     |
-| `ON DELETE SET NULL` | met les clés étrangères à `NULL`        |
-| `ON DELETE SET DEFAULT` | met une valeur par défaut            |
-| `ON DELETE CASCADE`  | supprime aussi les lignes référençantes |
+| Clause                  | Effet                                   |
+| ----------------------- | --------------------------------------- |
+| `ON DELETE RESTRICT`    | empêche la suppression (par défaut)     |
+| `ON DELETE NO ACTION`   | permet la suppression, ne fait rien     |
+| `ON DELETE SET NULL`    | met les clés étrangères à `NULL`        |
+| `ON DELETE SET DEFAULT` | met une valeur par défaut               |
+| `ON DELETE CASCADE`     | supprime aussi les lignes référençantes |
 
 ---
 
@@ -640,44 +640,86 @@ Avantages : historique complet, données récupérables.
 
 # Résumé — Mots-clés du jour
 
-| Mot-clé       | Rôle                                        |
-| ------------- | ------------------------------------------- |
-| `INSERT INTO` | insérer des lignes                          |
-| `DELETE FROM` | supprimer des lignes                        |
-| `UPDATE`      | modifier des lignes existantes              |
-| `SET`         | définir la nouvelle valeur (avec `UPDATE`)  |
-| `ON DELETE`   | action quand un ID référencé est supprimé   |
-| `CASCADE`     | suppression en cascade                      |
-| `OLD` / `NEW` | ligne supprimée / insérée dans un trigger   |
-| `TRIGGER`     | instruction automatique                     |
-| `DEFAULT`     | valeur par défaut (rappel)                  |
+| Mot-clé       | Rôle                                       |
+| ------------- | ------------------------------------------ |
+| `INSERT INTO` | insérer des lignes                         |
+| `DELETE FROM` | supprimer des lignes                       |
+| `UPDATE`      | modifier des lignes existantes             |
+| `SET`         | définir la nouvelle valeur (avec `UPDATE`) |
+| `ON DELETE`   | action quand un ID référencé est supprimé  |
+| `CASCADE`     | suppression en cascade                     |
+| `OLD` / `NEW` | ligne supprimée / insérée dans un trigger  |
+| `TRIGGER`     | instruction automatique                    |
+| `DEFAULT`     | valeur par défaut (rappel)                 |
 
 ---
 
 # Résumé — CRUD
 
-| Opération | SQL            | Exemple festival                |
-| --------- | -------------- | ------------------------------- |
-| **C**reate | `INSERT INTO` | ajouter un artiste              |
-| **R**ead   | `SELECT`      | consulter la programmation      |
-| **U**pdate | `UPDATE`      | changer un cachet ou une scène  |
-| **D**elete | `DELETE FROM` | annuler un concert              |
+| Opération  | SQL           | Exemple bibliothèque                |
+| ---------- | ------------- | ----------------------------------- |
+| **C**reate | `INSERT INTO` | ajouter un livre, un client         |
+| **R**ead   | `SELECT`      | consulter les emprunts en cours     |
+| **U**pdate | `UPDATE`      | enregistrer le retour d'un livre    |
+| **D**elete | `DELETE FROM` | supprimer un avis, un ancien client |
 
 ---
 
-# Exercices
+# Exercice — Votre base bibliothèque
 
-**1.** Insérez 3 artistes et 2 scènes dans `festival.db`.
+On laisse `festival.db` de côté.
 
-**2.** Programmez au moins 4 concerts.
+Ouvrez **votre** base de données bibliothèque
+et remplissez-la avec des données réalistes.
 
-**3.** Mettez à jour le cachet d'un artiste.
+⚠️ Première chose à faire :
 
-**4.** Supprimez un concert, puis un artiste
-(attention aux clés étrangères !).
+```sql
+PRAGMA foreign_keys = ON;
+```
 
-**5.** Créez un trigger qui enregistre dans `transactions`
-chaque nouveau concert programmé (avec le nom de l'artiste).
+---
 
-**6. Bonus** : Implémentez un soft delete sur la table `concerts`
-pour pouvoir annuler un concert sans le supprimer.
+# Conseil 1 — L'ordre d'insertion
+
+Avec les clés étrangères activées,
+on ne peut pas insérer n'importe quoi n'importe quand.
+
+→ Insérer un `livre` avec `id_editeur = 3`
+alors qu'aucun éditeur n'a l'ID 3 ? **Erreur.**
+
+Il faut remplir les tables **dans le bon ordre** :
+les tables référencées **avant** les tables qui référencent.
+
+💡 Regardez votre schéma et trouvez
+dans quel ordre insérer vos données.
+
+---
+
+# Conseil 2 — Pensez aux exemplaires
+
+Votre table `emprunt` pointe vers `livre`.
+
+Mais une bibliothèque possède souvent **plusieurs
+exemplaires** du même livre, dans différentes bibliothèques.
+
+→ Créez une table `exemplaire`
+(`id_exemplaire`, `id_livre`, `id_biblio`, `etat`…)
+
+Et modifiez `emprunt` pour pointer vers `exemplaire`
+plutôt que vers `livre`.
+
+---
+
+# Conseil 3 — Le soft delete
+
+Si on supprime un client, que deviennent ses emprunts ?
+Ses avis ? → Erreur de clé étrangère, ou perte de données.
+
+**Solution** : ne pas supprimer, mais _désactiver_.
+
+Ajoutez une colonne `actif` (défaut `1`) à `client`.
+Pour « supprimer » → mettre `actif` à `0`.
+
+Même logique pour les exemplaires perdus ou abîmés :
+une colonne `disponible` sur `exemplaire`.
