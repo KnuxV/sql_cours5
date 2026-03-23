@@ -8,6 +8,28 @@
 - Concentrons-nous d'abord sur l'**insertion** de données dans notre base `festival.db`.
 
 ## Rappel du Schéma
+```mermaid
+erDiagram
+  artistes {
+    INTEGER id PK "NOT NULL UNIQUE"
+    TEXT nom "NOT NULL UNIQUE"
+    INTEGER cachet
+    TEXT genre
+  }
+  scenes {
+    INTEGER id PK "NOT NULL UNIQUE AUTOINCREMENT"
+    TEXT nom "NOT NULL UNIQUE"
+    INTEGER capacite
+  }
+  concerts {
+    INTEGER id PK "NOT NULL UNIQUE AUTOINCREMENT"
+    INTEGER artiste_id FK "REFERENCES artistes(id)"
+    INTEGER scene_id FK "REFERENCES scenes(id)"
+    NUMERIC debut
+  }
+  artistes ||--o{ concerts : "se produit dans"
+  scenes ||--o{ concerts : "accueille"
+```
 
 - Rappelons le schéma de notre base de données, tel que nous l'avons créé la semaine dernière. On peut le vérifier de deux façons :
 
